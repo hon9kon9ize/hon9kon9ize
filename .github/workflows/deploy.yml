@@ -90,7 +90,7 @@ jobs:
           filters: |
             infra:
               - docker-compose.prod.yml
-      - name: Create .env file
+      - name: Create .env file and GCP service account key file
         if: needs.changes.outputs.infra == 'true' || needs.changes.outputs.extension-api == 'true' || needs.changes.outputs.yue-translate == 'true'
         run: |
           echo "Generating .env file"
@@ -104,13 +104,7 @@ jobs:
           echo "GCP_BUCKET_NAME=${{ secrets.GCP_BUCKET_NAME }}" >> .env
           echo "GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}" >> .env
           echo "LETSENCRYPT_EMAIL=${{ vars.LETSENCRYPT_EMAIL }}" >> .env
-      - name: Authenticate with Google Cloud
-        id: "auth"
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ vars.AUTH_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.AUTH_SERVICE_ACCOUNT }}
-          create_credentials_file: true
+          echo ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }} > .gcp.json
       # Copy docker-compose and .env files to target server
       - name: copy files to target server via scp
         if: steps.changes.outputs.infra == 'true'
@@ -120,7 +114,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USERNAME }}
           port: 4022
           key: ${{ secrets.DEPLOY_KEY }}
-          source: "./docker-compose.prod.yml,./.env,${{ steps.auth.outputs.credentials_file_path}}"
+          source: "./docker-compose.prod.yml,./.env,./.gcp.json"
           target: "~/.deploy/${{ github.event.repository.name }}/"
       # Deploy Docker image with your application using `docker compose up app` remotely
       - name: remote docker-compose up via ssh
@@ -138,5 +132,6 @@ jobs:
           script: |
             echo $APPTOKEN | docker login ghcr.io -u $USERNAME --password-stdin
             cd ~/.deploy/${{ github.event.repository.name }}
+            export GOOGLE_APPLICATION_CREDENTIALS=./.gcp.json
             docker compose -f ./docker-compose.prod.yml pull
             docker compose -f ./docker-compose.prod.yml up -d
