@@ -122,16 +122,16 @@ jobs:
         if: needs.changes.outputs.infra == 'true' || needs.changes.outputs.extension-api == 'true' || needs.changes.outputs.yue-translate == 'true'
         uses: appleboy/ssh-action@v1.0.3
         env:
-          APPTOKEN: ${{ secrets.GITHUB_TOKEN }}
-          USERNAME: ${{ secrets.DEPLOY_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.GH_DEPLOY_TOKEN }}
+          GITHUB_USER: ${{ secrets.GH_DEPLOY_USER }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USERNAME }}
           key: ${{ secrets.DEPLOY_KEY }}
           port: 4022
-          envs: APPTOKEN,USERNAME
+          envs: GITHUB_TOKEN,USERNAME
           script: |
-            echo $APPTOKEN | docker login ghcr.io -u $USERNAME --password-stdin
+            echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
             cd ~/.deploy/${{ github.event.repository.name }}
             export GOOGLE_APPLICATION_CREDENTIALS=./.gcp.json
             docker compose -f ./docker-compose.prod.yml pull

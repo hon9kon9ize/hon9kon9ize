@@ -11,7 +11,7 @@ services:
       LETSENCRYPT_HOST: ${YUE_TRANSLATE_DOMAIN}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     networks:
-      - nginx-network
+      - nginx-proxy
 
   extension-api:
     image: ghcr.io/hon9kon9ize/extension-api:release
@@ -31,8 +31,8 @@ services:
       LETSENCRYPT_HOST: ${EXTENSION_API_DOMAIN}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     networks:
-      - nginx-network
+      - nginx-proxy
 
 networks:
-  nginx-network:
+  nginx-proxy:
     external: true
