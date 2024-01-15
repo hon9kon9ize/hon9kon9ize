@@ -1,0 +1,5 @@
+optimum[onnxruntime]==1.16.1
+datasets
+flask
+gevent
+gunicorn

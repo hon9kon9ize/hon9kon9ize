@@ -1,0 +1,8 @@
+{
+  "name": "jest-presets",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@types/jest": "29.5.11"
+  }
+}

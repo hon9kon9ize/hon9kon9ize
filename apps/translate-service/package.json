@@ -1,0 +1,10 @@
+{
+  "name": "@hon9kon9ize/translate-service",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "author": "Joseph Cheng<joseph.cheng@hon9kon9ize.com> (https://hon9kon9ize.com)",
+  "scripts": {
+    "build": "docker build -t bart-translator-zh-yue ."
+  }
+}

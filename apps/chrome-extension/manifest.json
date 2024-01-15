@@ -1,0 +1,42 @@
+{
+  "short_name": "hon9kon9ize",
+  "name": "hon9kon9ize",
+  "description": "Hongkongizing the world through technology",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_icon": "images/logo48.png",
+    "default_title": "hon9kon9ize",
+    "default_popup": "src/pages/popup/index.html"
+  },
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "src/services/background.ts"
+  },
+  "icons": {
+    "16": "images/logo16.png",
+    "48": "images/logo48.png",
+    "128": "images/logo128.png",
+    "192": "images/logo192.png",
+    "512": "images/logo512.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "src/services/content.tsx"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [],
+      "matches": []
+    }
+  ]
+}

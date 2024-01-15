@@ -1,0 +1,29 @@
+{
+  "name": "eslint-config-custom",
+  "version": "0.0.0",
+  "main": "index.js",
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "4.1.1",
+    "@typescript-eslint/eslint-plugin": "6.18.1",
+    "@typescript-eslint/parser": "6.18.1",
+    "eslint": "8.56.0",
+    "eslint-config-airbnb": "19.0.4",
+    "eslint-config-airbnb-typescript": "17.1.0",
+    "eslint-config-next": "14.0.4",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-config-turbo": "latest",
+    "eslint-plugin-cypress": "2.15.1",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-jest": "27.6.2",
+    "eslint-plugin-jsx-a11y": "6.8.0",
+    "eslint-plugin-prettier": "5.1.3",
+    "eslint-plugin-promise": "6.1.1",
+    "eslint-plugin-react": "7.33.2",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "eslint-plugin-rxjs": "5.0.3",
+    "eslint-plugin-unicorn": "50.0.1",
+    "next": "14.0.4",
+    "react": "18.2.0",
+    "typescript": "5.3.3"
+  }
+}

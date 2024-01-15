@@ -1,0 +1,18 @@
+{
+  "extends": "./node18.json",
+  "exclude": [
+    "node_modules",
+    "**/*/dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "compilerOptions": {
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@hellojarvis/*": [
+        "./packages/*"
+      ]
+    }
+  }
+}
