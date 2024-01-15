@@ -8,7 +8,7 @@ from translator import Translator
 from translation_pipeline import TranslationPipeline
 
 prefix = "/opt/ml/"
-model_path = os.path.join(prefix, "model")
+model_path = "hon9kon9ize/bart-translation-zh-yue-onnx"
 
 # The flask app for serving predictions
 app = flask.Flask(__name__)
