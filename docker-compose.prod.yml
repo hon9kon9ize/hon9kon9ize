@@ -10,7 +10,6 @@ services:
       VIRTUAL_PORT: 8080
       LETSENCRYPT_HOST: ${YUE_TRANSLATE_DOMAIN}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-
     networks:
       - nginx-network
 
@@ -31,7 +30,6 @@ services:
       VIRTUAL_PORT: 8081
       LETSENCRYPT_HOST: ${EXTENSION_API_DOMAIN}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-      
     networks:
       - nginx-network
 
