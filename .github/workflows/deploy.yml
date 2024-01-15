@@ -30,6 +30,7 @@ jobs:
               - 'apps/extension-api/**'
             infra:
               - docker-compose.prod.yml
+              - .github/workflows/deploy.yml
 
   build-and-push-image:
     needs: changes
@@ -107,7 +108,7 @@ jobs:
           echo ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }} > .gcp.json
       # Copy docker-compose and .env files to target server
       - name: copy files to target server via scp
-        if: steps.changes.outputs.infra == 'true'
+        if: needs.changes.outputs.infra == 'true' || needs.changes.outputs.extension-api == 'true' || needs.changes.outputs.yue-translate == 'true'
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_HOST }}
@@ -118,7 +119,7 @@ jobs:
           target: "~/.deploy/${{ github.event.repository.name }}/"
       # Deploy Docker image with your application using `docker compose up app` remotely
       - name: remote docker-compose up via ssh
-        if: steps.changes.outputs.infra == 'true'
+        if: needs.changes.outputs.infra == 'true' || needs.changes.outputs.extension-api == 'true' || needs.changes.outputs.yue-translate == 'true'
         uses: appleboy/ssh-action@v1.0.3
         env:
           APPTOKEN: ${{ secrets.GITHUB_TOKEN }}
