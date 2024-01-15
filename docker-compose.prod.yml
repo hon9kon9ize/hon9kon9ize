@@ -1,0 +1,35 @@
+version: "3.9"
+services:
+  yue-translate:
+    image: ghcr.io/${YUE_TRANSLATE_IMAGE_REPO}:latest
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      VIRTUAL_HOST: ${EXTENSION_API_DOMAIN}
+      VIRTUAL_PORT: 8080
+      LETSENCRYPT_HOST: ${EXTENSION_API_DOMAIN}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+
+    networks:
+      - nginx-network
+
+  extension-api:
+    image: ghcr.io/${EXTENSION_API_IMAGE_REPO}:latest
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID}
+      GCP_BUCKET_NAME: ${GCP_BUCKET_NAME}
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+      HUGGINGFACE_INFERENCE_API_URL: ${HUGGINGFACE_INFERENCE_API_URL}
+    networks:
+      - nginx-network
+
+networks:
+  nginx-network:
+    external: true

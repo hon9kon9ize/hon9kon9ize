@@ -14,7 +14,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lint": "turbo lint",
     "test": "turbo test",
-    "test:watch": "turbo test:watch"
+    "test:watch": "turbo test:watch",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "eslint-config-custom": "*",

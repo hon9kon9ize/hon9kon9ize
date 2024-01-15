@@ -1,5 +1,5 @@
 export interface TranslateItem {
-  text: string;
+  translatedText: string;
   language: string;
   siteTitle: string;
   url: string;

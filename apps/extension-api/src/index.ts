@@ -1,6 +1,5 @@
 import "dotenv/config";
 
-import * as functions from "@google-cloud/functions-framework";
 import { v3beta1 } from "@google-cloud/translate";
 import express, { Request, Response } from "express";
 import tags from "language-tags";
@@ -26,9 +25,7 @@ const app = express();
 const v1Route = express.Router();
 let supportedLanguages: google.cloud.translation.v3beta1.ISupportedLanguages;
 
-const translationClient = new v3beta1.TranslationServiceClient({
-  projectId: GCP_PROJECT_ID,
-});
+const translationClient = new v3beta1.TranslationServiceClient();
 
 // register rate limit middleware
 const rateLimitMiddleware = slowDown({
@@ -43,7 +40,7 @@ app.use(cors());
 app.use(rateLimitMiddleware);
 app.use("/v1", v1Route);
 
-v1Route.get("/", (_req: Request, res: Response) => {
+app.get("/", (_req: Request, res: Response) => {
   res.redirect("https://www.hon9kon9ize.com");
 });
 
@@ -198,7 +195,9 @@ v1Route.post(
       if (cachedItem) {
         console.info("cache hit");
 
-        res.status(200).send(JSON.parse(cachedItem.text) as TranslateTextResponse);
+        res.status(200).send({
+          translatedText: cachedItem.translatedText,
+        });
 
         return;
       }
@@ -237,4 +236,6 @@ v1Route.post(
   }
 );
 
-functions.http("api", app);
+app.listen(8081, () => {
+  console.info("server started at http://localhost:8081");
+});

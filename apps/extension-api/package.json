@@ -6,11 +6,9 @@
   "author": "Joseph Cheng<joseph.cheng@hon9kon9ize.com> (https://hon9kon9ize.com)",
   "scripts": {
     "build": "tsc",
-    "predeploy": "npm run build && cp package.json dist && cp .gcloudignore dist && cp .gitignore dist",
-    "deploy": "gcloud functions deploy extension-api --gen2 --entry-point api --runtime nodejs20 --trigger-http --source ./dist/ --allow-unauthenticated --region asia-southeast1 --set-env-vars $(cat \".env.prod\" | xargs | sed 's/ /,/g') --memory 512Mi",
-    "gcp-build": "",
+    "dev": "ts-node --project tsconfig.json -r tsconfig-paths/register ./src/index.ts",
     "prestart": "npm run build",
-    "start": "functions-framework --target=api --source=./dist"
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "@aws-sdk/client-polly": "3.489.0",
@@ -23,7 +21,6 @@
     "dotenv": "16.3.1",
     "express": "4.18.2",
     "express-slow-down": "2.0.1",
-    "google-auth-library": "9.4.2",
     "language-tags": "1.0.9"
   },
   "devDependencies": {
@@ -32,6 +29,9 @@
     "@types/node": "20.10.8",
     "husky": "^8.0.3",
     "jest": "29.7.0",
+    "ts-node": "10.9.2",
+    "tsconfig": "*",
+    "tsconfig-paths": "4.2.0",
     "typescript": "5.3.3"
   },
   "engines": {
