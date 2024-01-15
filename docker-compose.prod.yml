@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   yue-translate:
-    image: ghcr.io/${YUE_TRANSLATE_IMAGE_REPO}:latest
+    image: ghcr.io/hon9kon9ize/yue-translate:release
     restart: always
     ports:
       - "8080:8080"
@@ -15,7 +15,7 @@ services:
       - nginx-network
 
   extension-api:
-    image: ghcr.io/${EXTENSION_API_IMAGE_REPO}:latest
+    image: ghcr.io/hon9kon9ize/extension-api:release
     restart: always
     ports:
       - "8081:8081"

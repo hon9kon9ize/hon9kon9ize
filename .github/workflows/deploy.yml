@@ -105,8 +105,6 @@ jobs:
           echo "GCP_BUCKET_NAME=${{ secrets.GCP_BUCKET_NAME }}" >> .env
           echo "GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}" >> .env
           echo "LETSENCRYPT_EMAIL=${{ vars.LETSENCRYPT_EMAIL }}" >> .env
-          echo "YUE_TRANSLATE_IMAGE_REPO=hon9kon9ize/yue-translate"
-          echo "EXTENSION_API_IMAGE_REPO=hon9kon9ize/extension-api"
 
       # Copy docker-compose and .env files to target server
       - name: copy files to target server via scp
