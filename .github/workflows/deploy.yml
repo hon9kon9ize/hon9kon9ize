@@ -10,17 +10,16 @@ env:
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
-
     strategy:
       fail-fast: false
       matrix:
         include:
-          - dockerfile: ./apps/yue-translate
+          - dockerfile: ./apps/yue-translate/Dockerfile
             image: ghcr.io/hon9kon9ize/yue-translate
-            context: ./apps/yue-translate
-          - dockerfile: ./apps/
+            name: yue-translate
+          - dockerfile: ./apps/extension-api/Dockerfile
             image: ghcr.io/hon9kon9ize/extension-api
-            context: ./apps/extension-api
+            name: extension-api
 
     permissions:
       contents: read
@@ -29,23 +28,35 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            yue-translate:
+              - 'apps/yue-translate/**'
+            extension-api:
+              - 'apps/extension-api/**'
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
+        if: steps.changes.outputs[matrix.name] == 'true'
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
+        if: steps.changes.outputs[matrix.name] == 'true'
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: ${{ matrix.image }}
 
       - name: Build and push Docker image of the translate service
+        if: steps.changes.outputs[matrix.name] == 'true'
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
-          context: ${{ matrix.context }}
+          context: .
           file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -54,13 +65,22 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    needs: build-and-push-image
+
     permissions:
       contents: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            infra:
+              - docker-compose.prod.yml
       - name: Create .env file
+        if: steps.changes.outputs.infra == 'true'
         run: |
           echo "Generating .env file"
 
@@ -80,6 +100,7 @@ jobs:
 
       # Copy docker-compose and .env files to target server
       - name: copy files to target server via scp
+        if: steps.changes.outputs.infra == 'true'
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_HOST }}
@@ -91,6 +112,7 @@ jobs:
 
       # Deploy Docker image with your application using `docker compose up app` remotely
       - name: remote docker-compose up via ssh
+        if: steps.changes.outputs.infra == 'true'
         uses: appleboy/ssh-action@v1.0.3
         env:
           APPTOKEN: ${{ secrets.GITHUB_TOKEN }}
