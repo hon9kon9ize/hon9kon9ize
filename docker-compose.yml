@@ -6,24 +6,15 @@ services:
       dockerfile: apps/yue-translate/Dockerfile
     restart: always
     ports:
-      - "8080:8080"
-    environment:
-      VIRTUAL_HOST: ${YUE_TRANSLATE_DOMAIN}
-      VIRTUAL_PORT: 8080
-      LETSENCRYPT_HOST: ${YUE_TRANSLATE_DOMAIN}
-      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-
-    networks:
-      - nginx-network
+      - "5080:8080"
 
   extension-api:
     build:
       context: .
       dockerfile: apps/extension-api/Dockerfile
-
     restart: always
     ports:
-      - "8081:8081"
+      - "5081:8081"
     environment:
       GCP_PROJECT_ID: ${GCP_PROJECT_ID}
       GCP_BUCKET_NAME: ${GCP_BUCKET_NAME}
@@ -32,13 +23,3 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
       HUGGINGFACE_INFERENCE_API: http://yue-translate:8080
-      VIRTUAL_HOST: ${EXTENSION_API_DOMAIN}
-      VIRTUAL_PORT: 8081
-      LETSENCRYPT_HOST: ${EXTENSION_API_DOMAIN}
-      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-    networks:
-      - nginx-network
-
-networks:
-  nginx-network:
-    external: true
