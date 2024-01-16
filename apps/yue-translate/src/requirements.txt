@@ -1,4 +1,4 @@
-transformers[torch]
+transformers[onnx]
 optimum[onnxruntime]==1.16.1
 datasets
 flask
