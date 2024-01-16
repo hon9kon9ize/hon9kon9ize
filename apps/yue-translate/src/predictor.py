@@ -36,6 +36,11 @@ def invocations():
     input_json = flask.request.get_json()
     data = input_json["input"]
 
+    if len(data) == 0:
+        return flask.Response(
+            response="No input text provided", status=400, mimetype="text/plain"
+        )
+
     # Custom model
     result = translator(data)[0]
 
