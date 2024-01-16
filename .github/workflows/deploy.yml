@@ -109,8 +109,6 @@ jobs:
           echo "Generating .env file"
 
           echo "HOST_DOMAIN=${{ secrets.DEPLOY_HOST }}" >> .env
-          echo "EXTENSION_API_DOMAIN=${{ vars.DEPLOY_EXTENSION_API_HOST }}" >> .env
-          echo "YUE_TRANSLATE_DOMAIN=${{ vars.DEPLOY_YUE_TRANSLATE_HOST }}" >> .env
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
           echo "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}" >> .env

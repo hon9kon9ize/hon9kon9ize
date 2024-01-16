@@ -11,6 +11,8 @@ services:
     restart: always
     ports:
       - "5081:8081"
+    volumes:
+      - ./.gcp.json:/app/.gcp.json
     environment:
       GCP_PROJECT_ID: ${GCP_PROJECT_ID}
       GCP_BUCKET_NAME: ${GCP_BUCKET_NAME}
