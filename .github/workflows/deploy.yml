@@ -3,6 +3,11 @@ on:
   push:
     branches: ['release']
   workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: 'Set "yes" to force rebuild images'
+        required: true
+        default: 'no'
 
 env:
   REGISTRY: ghcr.io
@@ -59,13 +64,13 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Log in to the Container registry
         uses: docker/login-action@v3
-        if: needs.changes.outputs[matrix.name] == 'true' || github.event_name == 'workflow_dispatch'
+        if: needs.changes.outputs[matrix.name] == 'true' || github.event.inputs.force_rebuild == 'yes'
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Extract metadata (tags, labels) for Docker
-        if: needs.changes.outputs[matrix.name] == 'true' || github.event_name == 'workflow_dispatch'
+        if: needs.changes.outputs[matrix.name] == 'true' || github.event.inputs.force_rebuild == 'yes'
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -115,7 +120,7 @@ jobs:
           echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > .gcp.json
       # Copy docker-compose and .env files to target server
       - name: copy files to target server via scp
-        if: needs.changes.outputs.infra == 'true' || needs.changes.outputs.extension-api == 'true' || needs.changes.outputs.yue-translate == 'true' || github.event_name == 'workflow_dispatch'
+        if: needs.changes.outputs.infra == 'true' || needs.changes.outputs.extension-api == 'true' || needs.changes.outputs.yue-translate == 'true' || github.event.inputs.force_rebuild == 'yes'
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_HOST }}
@@ -126,7 +131,7 @@ jobs:
           target: "~/.deploy/${{ github.event.repository.name }}/"
       # Deploy Docker image with your application using `docker compose up app` remotely
       - name: remote docker-compose up via ssh
-        if: needs.changes.outputs.infra == 'true' || needs.changes.outputs.extension-api == 'true' || needs.changes.outputs.yue-translate == 'true' || github.event_name == 'workflow_dispatch'
+        if: needs.changes.outputs.infra == 'true' || needs.changes.outputs.extension-api == 'true' || needs.changes.outputs.yue-translate == 'true' || github.event.inputs.force_rebuild == 'yes'
         uses: appleboy/ssh-action@v1.0.3
         env:
           GITHUB_TOKEN: ${{ secrets.GH_DEPLOY_TOKEN }}
