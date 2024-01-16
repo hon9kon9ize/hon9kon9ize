@@ -111,10 +111,11 @@ jobs:
           echo "HOST_DOMAIN=${{ secrets.DEPLOY_HOST }}" >> .env
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
-          echo "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}" >> .env
+          echo "AWS_DEFAULT_REGION=${{ vars.AWS_DEFAULT_REGION }}" >> .env
           echo "GCP_BUCKET_NAME=${{ secrets.GCP_BUCKET_NAME }}" >> .env
           echo "GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}" >> .env
           echo "LETSENCRYPT_EMAIL=${{ vars.LETSENCRYPT_EMAIL }}" >> .env
+          echo "GOOGLE_APPLICATION_CREDENTIALS=./.gcp.json" >> .env
           echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > .gcp.json
       # Copy docker-compose and .env files to target server
       - name: copy files to target server via scp
@@ -143,6 +144,5 @@ jobs:
           script: |
             echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USER --password-stdin
             cd ~/.deploy/${{ github.event.repository.name }}
-            export GOOGLE_APPLICATION_CREDENTIALS=./.gcp.json
             docker compose -f ./docker-compose.prod.yml pull
             docker compose -f ./docker-compose.prod.yml up -d

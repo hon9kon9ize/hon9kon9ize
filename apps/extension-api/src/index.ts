@@ -55,16 +55,16 @@ v1Route.post("/tts", async (req: Request, res: Response<TTSResponse | ErrorRespo
     // find cache from cache storage
     const cacheKey = md5hash(`${text}`);
     const cacheFileKey = `${cacheKey}.mp3`;
-    const cacheSpeechMarksKey = `${cacheKey}:speechMarks`;
+    const cacheSpeechMarksKey = `${cacheKey}.json`;
     const cachedMp3File = await FileCache.get(cacheFileKey);
-    const cachedSpeechMarks = await KeyValueCache.get(cacheSpeechMarksKey);
+    const cachedSpeechMarks = await FileCache.get(cacheSpeechMarksKey);
 
     if (cachedMp3File !== null && cachedSpeechMarks !== null) {
       console.info("cache hit");
 
       res.status(200).send({
         mp3Buffer: cachedMp3File,
-        speechMarks: JSON.parse(cachedSpeechMarks.value),
+        speechMarks: JSON.parse(cachedSpeechMarks.toString()),
       });
 
       return;
@@ -80,7 +80,7 @@ v1Route.post("/tts", async (req: Request, res: Response<TTSResponse | ErrorRespo
 
     // save cache to cache storage
     await FileCache.set(cacheFileKey, mp3Buffer);
-    await KeyValueCache.set(cacheSpeechMarksKey, JSON.stringify(speechMarks));
+    await FileCache.set(cacheSpeechMarksKey, Buffer.from(JSON.stringify(speechMarks)));
 
     res.status(200).send({
       mp3Buffer,
