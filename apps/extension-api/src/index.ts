@@ -4,7 +4,6 @@ import { v3beta1 } from "@google-cloud/translate";
 import express, { Request, Response } from "express";
 import tags from "language-tags";
 import { slowDown } from "express-slow-down";
-import cors from "cors";
 import { google } from "@google-cloud/translate/build/protos/protos";
 import {
   DetectLanguageRequest,
@@ -36,7 +35,6 @@ const rateLimitMiddleware = slowDown({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
 app.use(rateLimitMiddleware);
 app.use("/v1", v1Route);
 
