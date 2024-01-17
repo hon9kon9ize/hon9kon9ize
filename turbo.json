@@ -1,16 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    "**/.env.*local"
-  ],
+  "globalDependencies": ["**/.env.*local"],
+  "globalDotEnv": [".env"],
   "pipeline": {
     "build": {
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "dist",
-        "build"
-      ]
+      "outputs": [".next/**", "!.next/cache/**", "dist", "build"]
     },
     "build:watch": {
       "cache": false
@@ -35,6 +29,7 @@
     "HUGGINGFACE_INFERENCE_API",
     "AWS_ACCESS_KEY_ID",
     "AWS_SECRET_ACCESS_KEY",
-    "AWS_DEFAULT_REGION"
+    "AWS_DEFAULT_REGION",
+    "CDN_URL"
   ]
 }

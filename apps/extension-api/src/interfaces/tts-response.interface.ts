@@ -1,6 +1,6 @@
 export interface TTSResponse {
-  mp3Buffer: Buffer;
-  speechMarks: SpeechMark[];
+  mp3Url: string;
+  speechMarksUrl: string;
 }
 
 export interface SpeechMark {

@@ -1,5 +1,3 @@
-import "dotenv/config";
-
 import { v3beta1 } from "@google-cloud/translate";
 import express, { Request, Response } from "express";
 import tags from "language-tags";
@@ -15,7 +13,7 @@ import {
   TranslateTextRequestBody,
   TranslateTextResponse,
 } from "./interfaces";
-import { FileCache, KeyValueCache, md5hash, tts } from "./lib";
+import { KeyValueCache, Storage, md5hash, tts } from "./lib";
 import { translateYue } from "./lib/translate-yue";
 
 const GCP_PROJECT_ID = process.env.GCP_PROJECT_ID as string;
@@ -56,15 +54,15 @@ v1Route.post("/tts", async (req: Request, res: Response<TTSResponse | ErrorRespo
     const cacheKey = md5hash(`${text}`);
     const cacheFileKey = `${cacheKey}.mp3`;
     const cacheSpeechMarksKey = `${cacheKey}.json`;
-    const cachedMp3File = await FileCache.get(cacheFileKey);
-    const cachedSpeechMarks = await FileCache.get(cacheSpeechMarksKey);
+    const cachedMp3Url = await Storage.getUrl(cacheFileKey);
+    const cachedSpeechMarksUrl = await Storage.getUrl(cacheSpeechMarksKey);
 
-    if (cachedMp3File !== null && cachedSpeechMarks !== null) {
-      console.info("cache hit");
+    if (cachedMp3Url !== null && cachedSpeechMarksUrl !== null) {
+      console.info("[/tts]: cache hit");
 
       res.status(200).send({
-        mp3Buffer: cachedMp3File,
-        speechMarks: JSON.parse(cachedSpeechMarks.toString()),
+        mp3Url: cachedMp3Url,
+        speechMarksUrl: cachedSpeechMarksUrl,
       });
 
       return;
@@ -73,22 +71,32 @@ v1Route.post("/tts", async (req: Request, res: Response<TTSResponse | ErrorRespo
     const { mp3Buffer, speechMarks } = await tts(text); // mp3 audio buffer
 
     if (!mp3Buffer) {
-      res.status(500).send({ message: "tts error" });
+      res.status(500).send({ message: "Cannot get tts mp3 file" });
 
       return;
     }
 
     // save cache to cache storage
-    await FileCache.set(cacheFileKey, mp3Buffer);
-    await FileCache.set(cacheSpeechMarksKey, Buffer.from(JSON.stringify(speechMarks)));
+    await Storage.set(cacheFileKey, mp3Buffer);
+    await Storage.set(cacheSpeechMarksKey, Buffer.from(JSON.stringify(speechMarks)));
+
+    // get signed url
+    const mp3Url = await Storage.getUrl(cacheFileKey);
+    const speechMarksUrl = await Storage.getUrl(cacheSpeechMarksKey);
+
+    if (!mp3Url || !speechMarksUrl) {
+      res.status(500).send({ message: "Cannot get upload file urls" });
+
+      return;
+    }
 
     res.status(200).send({
-      mp3Buffer,
-      speechMarks,
+      mp3Url,
+      speechMarksUrl,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).send({ message: "tts error" });
+    console.error("[/tts]:", error);
+    res.status(500).send({ message: "error" });
   }
 });
 
@@ -110,7 +118,7 @@ v1Route.post(
         translatedText,
       });
     } catch (error) {
-      console.error(error);
+      console.error("[/translate-yue]:", error);
       res.status(500).send({ message: "translation error" });
     }
   }
@@ -146,7 +154,7 @@ v1Route.post(
           })) as DetectedLanguage[],
       });
     } catch (error) {
-      console.error(error);
+      console.error("[/detect-language]:", error);
       res.status(500).send({ message: "translation error" });
     }
   }
@@ -191,7 +199,7 @@ v1Route.post(
       }
 
       if (cachedItem) {
-        console.info("cache hit");
+        console.info("[/translate]: cache hit");
 
         res.status(200).send({
           translatedText: cachedItem.translatedText,
@@ -228,7 +236,7 @@ v1Route.post(
         translatedText,
       });
     } catch (error) {
-      console.error(error);
+      console.error("[/translate]:", error);
       res.status(500).send({ message: "translation error" });
     }
   }

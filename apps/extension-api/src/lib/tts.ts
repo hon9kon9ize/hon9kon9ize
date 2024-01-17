@@ -1,5 +1,5 @@
 import { PollyClient, SynthesizeSpeechCommand } from "@aws-sdk/client-polly";
-import { SpeechMark, TTSResponse } from "../interfaces";
+import { SpeechMark } from "../interfaces";
 
 const AWS_DEFAULT_REGION = process.env.AWS_DEFAULT_REGION as string;
 
@@ -7,7 +7,12 @@ const client = new PollyClient({
   region: AWS_DEFAULT_REGION,
 });
 
-export const tts = async (text: string): Promise<TTSResponse> => {
+export interface TTSItem {
+  mp3Buffer: Buffer;
+  speechMarks: SpeechMark[];
+}
+
+export const tts = async (text: string): Promise<TTSItem> => {
   const voiceId = "Hiujin";
   const engine = "neural";
 
