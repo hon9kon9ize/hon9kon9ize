@@ -1,6 +1,26 @@
+import Frame from "react-frame-component";
+import { createRoot } from "react-dom/client";
 // listening to selected text event in browser
 
 import { ErrorMessageEvent, ExtensionEvent, SelectedTextEvent } from "../types/events";
+
+const createButtons = (boundingRect: DOMRect) => {
+  const buttonsContainer = document.createElement("div");
+
+  buttonsContainer.classList.add("hk9-buttons-container");
+  buttonsContainer.style.top = `${boundingRect.top}px`;
+  buttonsContainer.style.left = `${boundingRect.left}px`;
+  buttonsContainer.style.width = `${boundingRect.width}px`;
+  buttonsContainer.style.height = `${boundingRect.height}px`;
+
+  document.body.append(buttonsContainer);
+
+  createRoot(buttonsContainer).render(
+    <Frame>
+      <div>hello</div>
+    </Frame>
+  );
+};
 
 const handleSelectedText = () => {
   const selection = window.getSelection();
@@ -19,10 +39,10 @@ const handleSelectedText = () => {
   const selectedText = selection.toString().trim();
   const boundingRect = selection.getRangeAt(0).getBoundingClientRect();
 
-  if (selectedText.length < 10) {
+  if (selectedText.length < 5) {
     chrome.runtime.sendMessage({
       type: "ERROR_MESSAGE",
-      message: "Please select at least 10 characters.",
+      message: "Please select at least 5 characters.",
     } as ErrorMessageEvent);
 
     return;
@@ -33,6 +53,8 @@ const handleSelectedText = () => {
     selectedText,
     boundingRect,
   } as SelectedTextEvent);
+
+  createButtons(boundingRect);
 
   // get all selected node parents in the selection
 
