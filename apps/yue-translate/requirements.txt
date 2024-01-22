@@ -1,5 +1,5 @@
 --extra-index-url=https://download.pytorch.org/whl/cpu
-transformers[onnx]
+transformers[onnx]==4.36.2
 optimum[onnxruntime]==1.16.1
 datasets
 flask
