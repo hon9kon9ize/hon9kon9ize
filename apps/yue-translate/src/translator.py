@@ -105,7 +105,7 @@ class Translator:
         # TODO: escape entity placeholders
 
         for i, entity in enumerate(entities):
-            text = text.replace(entity, "eeee[%d]" % i, 1)
+            text = text.replace(entity, "卍[%d]卍" % i, 1)
 
         lines = text.split("\n")
         sentences = []
@@ -184,7 +184,7 @@ class Translator:
 
         # replace entities
         for i, entity in enumerate(entities):
-            output = output.replace("eeee[%d]" % i, entity, 1)
+            output = output.replace("卍[%d]卍" % i, entity, 1)
 
         # TODO: unescape entity placeholders
 
@@ -226,7 +226,6 @@ class Translator:
             templates.append(template)
             sentence_indices.append([])
             entities_list.append(entities)
-            print('num_tokens', my_num_tokens)
 
             for j, chunk in enumerate(chunks):
                 sentences.append(chunk)
@@ -256,9 +255,7 @@ class Translator:
             [{"text": text} for text in sentences[len(translations):]]
         )
 
-        print(inputs, num_tokens)
-
-        max_token_length = max(num_tokens)
+        max_token_length = max(num_tokens) if len(num_tokens) > 0 else 0
 
         if self.verbose:
             print('Max Length:', max_token_length)
@@ -333,7 +330,7 @@ class FakePipe(object):
             entities = urls + emails + tags + handles
 
             for i, entity in enumerate(entities):
-                sentence = sentence.replace(entity, "eeee[%d]" % i, 1)
+                sentence = sentence.replace(entity, "卍[%d]卍" % i, 1)
 
             if "１２３" in sentence:
                 yield [{"translation_text": sentence.replace("１２３", "123")}]
@@ -392,7 +389,8 @@ while True:
     text4 = "１２３ “abc” def's http://www.google.com abc@abc.com @abc 網址：http://localhost/abc下載"
     text5 = "新力公司董事長盛田昭夫、自民黨國會議員石原慎太郎等人撰寫嘅《日本可以說「不」》、《日本還要說「不」》、《日本堅決說「不」》三本書中話道：「無啦啦挑起戰爭嘅好戰日本人，製造南京大屠殺嘅殘暴嘅日本人，呢d就係人地對日本人嘅兩個誤解，都係‘敲打日本’嘅兩個根由，我地必須採取措施消除佢。」"
     text6 = "List:\n1. abc\n2. xyz"
-    outputs = translator([text1, text2, text3, text4, text5, text6])
+    text7 = "例子。<mask>"
+    outputs = translator([text1, text2, text3, text4, text5, text6, text7])
 
     # for i, line in enumerate(outputs[1].split("\n")):
     #     input_text = text2.split("\n")[i]
@@ -406,6 +404,7 @@ while True:
     assert outputs[3] == text4.replace("“", "「").replace("”", "」")
     assert outputs[4] == text5
     assert outputs[5] == text6
+    assert outputs[6] == text7
 
     # exception
     assert len(translator._split_sentences(
@@ -416,3 +415,9 @@ while True:
 
     assert len(translator._split_sentences(
         "====。====。====。====。====。====。====。====。====。")) == 9
+
+    # test non-chinese
+    outputs = translator(["abc", "123"])
+
+    assert outputs[0] == "abc"
+    assert outputs[1] == "123"

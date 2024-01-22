@@ -9,10 +9,7 @@
     "default_title": "hon9kon9ize",
     "default_popup": "src/pages/popup/index.html"
   },
-  "permissions": [
-    "activeTab",
-    "storage"
-  ],
+  "permissions": ["activeTab", "storage"],
   "background": {
     "service_worker": "src/services/background.ts"
   },
@@ -25,12 +22,8 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "src/services/content.tsx"
-      ]
+      "matches": ["https://www.google.com/*"],
+      "js": ["src/services/content.tsx"]
     }
   ],
   "web_accessible_resources": [
