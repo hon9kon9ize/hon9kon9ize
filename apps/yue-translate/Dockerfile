@@ -7,7 +7,7 @@ RUN apt-get update \
 
 WORKDIR /app
 
-COPY apps/yue-translate/src/requirements.txt /app/requirements.txt
+COPY apps/yue-translate/requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 
 COPY apps/yue-translate/src /app

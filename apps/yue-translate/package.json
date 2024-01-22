@@ -5,6 +5,7 @@
   "license": "MIT",
   "author": "Joseph Cheng<joseph.cheng@hon9kon9ize.com> (https://hon9kon9ize.com)",
   "scripts": {
-    "build": "docker build -t bart-translator-zh-yue ."
+    "build": "docker build -t bart-translator-zh-yue .",
+    "dev": "python3 -m flask --app src/app:app run --host=0.0.0.0 --port=8080"
   }
 }

@@ -221,17 +221,18 @@ class Translator:
             ds = Dataset.from_list([{"text": text} for text in inputs])
 
         for i, text_input in tqdm(enumerate(ds), total=len(ds), desc="Preprocessing", disable=not self.verbose):
-            chunks, template, num_tokens, entities = self._preprocess(
+            chunks, template, my_num_tokens, entities = self._preprocess(
                 text_input["text"])
             templates.append(template)
             sentence_indices.append([])
             entities_list.append(entities)
+            print('num_tokens', my_num_tokens)
 
             for j, chunk in enumerate(chunks):
                 sentences.append(chunk)
                 sentence_indices[len(sentence_indices) -
                                  1].append(len(sentences) - 1)
-                num_tokens.append(num_tokens[j])
+                num_tokens.append(my_num_tokens[j])
 
         if self.save_filename:
             resume_from_file = (
@@ -254,6 +255,8 @@ class Translator:
         ds = Dataset.from_list(
             [{"text": text} for text in sentences[len(translations):]]
         )
+
+        print(inputs, num_tokens)
 
         max_token_length = max(num_tokens)
 
@@ -341,6 +344,9 @@ class FakePipe(object):
             if "Acetaminophen" in sentence:
                 yield [{"translation_text": sentence.replace("Acetaminophen", "ACEtaminidien")}]
                 continue
+            if re.search('\d+\.\s', sentence):
+                yield [{"translation_text": sentence.replace(r'(\d+\.)\s', r'\1')}]
+                continue
             yield [{"translation_text": sentence}]
 
 
@@ -385,7 +391,8 @@ while True:
     text3 = "布洛芬(Ibuprofen)同撲熱息痛(Acetaminophen)係兩種常見嘅非處方藥，用於緩解疼痛、發燒同關節痛。"
     text4 = "１２３ “abc” def's http://www.google.com abc@abc.com @abc 網址：http://localhost/abc下載"
     text5 = "新力公司董事長盛田昭夫、自民黨國會議員石原慎太郎等人撰寫嘅《日本可以說「不」》、《日本還要說「不」》、《日本堅決說「不」》三本書中話道：「無啦啦挑起戰爭嘅好戰日本人，製造南京大屠殺嘅殘暴嘅日本人，呢d就係人地對日本人嘅兩個誤解，都係‘敲打日本’嘅兩個根由，我地必須採取措施消除佢。」"
-    outputs = translator([text1, text2, text3, text4, text5])
+    text6 = "List:\n1. abc\n2. xyz"
+    outputs = translator([text1, text2, text3, text4, text5, text6])
 
     # for i, line in enumerate(outputs[1].split("\n")):
     #     input_text = text2.split("\n")[i]
@@ -398,6 +405,7 @@ while True:
     assert outputs[2] == text3
     assert outputs[3] == text4.replace("“", "「").replace("”", "」")
     assert outputs[4] == text5
+    assert outputs[5] == text6
 
     # exception
     assert len(translator._split_sentences(

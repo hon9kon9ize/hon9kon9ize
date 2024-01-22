@@ -34,6 +34,7 @@ def ping():
 def invocations():
     # Process input
     input_json = flask.request.get_json()
+    print(input_json)
     data = input_json["input"]
 
     if len(data) == 0:
@@ -44,6 +45,8 @@ def invocations():
     # Custom model
     result = translator(data)[0]
 
+    print(result)
+
     # Return value
-    result = json.dumps({"output": result})
+    result = json.dumps({"output": result}, ensure_ascii=False)
     return flask.Response(response=result, status=200, mimetype="application/json")
