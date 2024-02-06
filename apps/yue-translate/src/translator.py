@@ -9,10 +9,12 @@ from transformers.pipelines.pt_utils import KeyDataset
 from transformers import AutoTokenizer
 from tqdm.auto import tqdm
 
-URL_REGEX = r"\b(https?://\S+)\b"
-EMAIL_REGEX = r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)"
-TAG_REGEX = r"<[^>]+>"
-HANDLE_REGEX = r"[^a-zA-Z](@\w+)"
+URL_REGEX = re.compile(r"\b(https?://\S+)\b")
+EMAIL_REGEX = re.compile(r"([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)")
+TAG_REGEX = re.compile(r"<[^>]+>")
+HANDLE_REGEX = re.compile(r"[^a-zA-Z](@\w+)")
+CHINESE_CHAR_RANGE = re.compile(
+    r"[\u4e00-\u9fff\u3400-\u4dbf\U00020000-\U0002a6df\U0002a700-\U0002ebef\U00030000-\U000323af\ufa0e\ufa0f\ufa11\ufa13\ufa14\ufa1f\ufa21\ufa23\ufa24\ufa27\ufa28\ufa29\u3006\u3007][\ufe00-\ufe0f\U000e0100-\U000e01ef]?")
 
 
 class Translator:
@@ -40,13 +42,7 @@ class Translator:
             self.max_length = pipe.model.config.max_length
 
     def _is_chinese(self, text: str) -> bool:
-        return (
-            re.search(
-                r"[\u4e00-\u9fff\u3400-\u4dbf\U00020000-\U0002a6df\U0002a700-\U0002ebef\U00030000-\U000323af\ufa0e\ufa0f\ufa11\ufa13\ufa14\ufa1f\ufa21\ufa23\ufa24\ufa27\ufa28\ufa29\u3006\u3007][\ufe00-\ufe0f\U000e0100-\U000e01ef]?",
-                text,
-            )
-            is not None
-        )
+        return CHINESE_CHAR_RANGE.search(text) is not None
 
     def _split_sentences(self, text: str) -> List[str]:
         tokens = self.pipe.tokenizer(text, add_special_tokens=False)
@@ -96,16 +92,16 @@ class Translator:
 
     def _preprocess(self, text: str) -> (str, str):
         # extract entities
-        tags = re.findall(TAG_REGEX, text)
-        handles = re.findall(HANDLE_REGEX, text)
-        urls = re.findall(URL_REGEX, text)
-        emails = re.findall(EMAIL_REGEX, text)
+        tags = TAG_REGEX.findall(text)
+        handles = HANDLE_REGEX.findall(text)
+        urls = URL_REGEX.findall(text)
+        emails = EMAIL_REGEX.findall(text)
         entities = urls + emails + tags + handles
 
         # TODO: escape entity placeholders
 
         for i, entity in enumerate(entities):
-            text = text.replace(entity, "卍[%d]卍" % i, 1)
+            text = text.replace(entity, "¡%d¡" % i, 1)
 
         lines = text.split("\n")
         sentences = []
@@ -136,7 +132,7 @@ class Translator:
     ) -> str:
         processed = []
         alphanumeric_regex = re.compile(
-            "([a-zA-Zａ-ｚＡ-Ｚ０-９\d+'\",，（\(）\)：:；;“”。·\.\？?\！!‘’$\[\]<>/]+)"
+            "([a-zA-Zａ-ｚＡ-Ｚ０-９\d+'\",，（\(）\)：:；;“”。·\.\？?\！!‘’$\[\]<>/\s]+)"
         )
 
         def hash_text(text: List[str]) -> str:
@@ -177,6 +173,14 @@ class Translator:
                 for j in range(len(src_matches)):
                     if src_matches[j] != tgt_matches[j]:
                         p = p.replace(tgt_matches[j], src_matches[j], 1)
+            elif ''.join(src_matches) != ''.join(tgt_matches):
+                p_blanks = re.split('|'.join(tgt_matches), p)
+                # fill blank with src matches
+                for j in range(len(src_matches)):
+                    p_blanks[j] = p_blanks[j] + src_matches[j]
+
+                p = "".join(p_blanks)
+                print(p)
 
             processed.append(p)
 
@@ -184,7 +188,7 @@ class Translator:
 
         # replace entities
         for i, entity in enumerate(entities):
-            output = output.replace("卍[%d]卍" % i, entity, 1)
+            output = output.replace("¡%d¡" % i, entity, 1)
 
         # TODO: unescape entity placeholders
 
@@ -330,7 +334,7 @@ class FakePipe(object):
             entities = urls + emails + tags + handles
 
             for i, entity in enumerate(entities):
-                sentence = sentence.replace(entity, "卍[%d]卍" % i, 1)
+                sentence = sentence.replace(entity, "¡[%d]¡" % i, 1)
 
             if "１２３" in sentence:
                 yield [{"translation_text": sentence.replace("１２３", "123")}]
@@ -421,3 +425,13 @@ while True:
 
     assert outputs[0] == "abc"
     assert outputs[1] == "123"
+
+    # test _postprocess
+    assert translator._postprocess(
+        "{}", ["abc"], ["ABC"], []) == "abc"
+
+    print(translator._postprocess(
+        "{}\n{}", ["($1,000)", "XYZ"], ["( $1, 000 )", "xyz"], []))
+
+    assert translator._postprocess(
+        "{}\n{}", ["($1,000)", "XYZ"], ["( $1, 000 )", "xyz"], []) == "($1,000)\nXYZ"

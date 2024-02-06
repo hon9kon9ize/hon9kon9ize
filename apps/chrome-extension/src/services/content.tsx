@@ -4,14 +4,27 @@ import { createRoot } from "react-dom/client";
 
 import { ErrorMessageEvent, ExtensionEvent, SelectedTextEvent } from "../types/events";
 
-const createButtons = (boundingRect: DOMRect) => {
-  const buttonsContainer = document.createElement("div");
+const createConfirmButtons = (selection: Selection) => {
+  // remove all previous buttons
+  const buttonsContainers = document.querySelectorAll(".hk9-buttons-container");
+
+  for (const container of buttonsContainers) {
+    container.remove();
+  }
+
+  // calculate the global position of the selected text
+  const range = selection.getRangeAt(0);
+  const rect = range.getBoundingClientRect();
+
+  console.log("selectedText =", selectedText);
 
   buttonsContainer.classList.add("hk9-buttons-container");
-  buttonsContainer.style.top = `${boundingRect.top}px`;
-  buttonsContainer.style.left = `${boundingRect.left}px`;
-  buttonsContainer.style.width = `${boundingRect.width}px`;
-  buttonsContainer.style.height = `${boundingRect.height}px`;
+  buttonsContainer.style.top = `${rect.top}px`;
+  buttonsContainer.style.left = `${rect.left}px`;
+  buttonsContainer.style.width = `100px`;
+  buttonsContainer.style.height = `100px`;
+  buttonsContainer.style.position = "absolute";
+  buttonsContainer.style.zIndex = "9999";
 
   document.body.append(buttonsContainer);
 
@@ -36,54 +49,7 @@ const handleSelectedText = () => {
     return;
   }
 
-  const selectedText = selection.toString().trim();
-  const boundingRect = selection.getRangeAt(0).getBoundingClientRect();
-
-  if (selectedText.length < 5) {
-    chrome.runtime.sendMessage({
-      type: "ERROR_MESSAGE",
-      message: "Please select at least 5 characters.",
-    } as ErrorMessageEvent);
-
-    return;
-  }
-
-  chrome.runtime.sendMessage({
-    type: "SELECTED_TEXT",
-    selectedText,
-    boundingRect,
-  } as SelectedTextEvent);
-
-  createButtons(boundingRect);
-
-  // get all selected node parents in the selection
-
-  // get all text nodes in the selection
-  // const nodes = getTextNodesForSelection(selection);
-  // const selectedTexts = [];
-
-  // add class to selected text
-  // for (const node of nodes) {
-  //   const container = getTextNodeContainer(node);
-
-  //   console.log(node, node.);
-  //   const textContent = node.textContent?.trim() || "";
-
-  //   if (!container || textContent.length === 0 || !isAlphanumeric(textContent)) {
-  //     // eslint-disable-next-line no-continue
-  //     continue;
-  //   }
-
-  //   selectedTexts.push(textContent);
-
-  //   // (container as HTMLElement).classList.add("hk9-highlighted");
-  // }
-
-  //   chrome.runtime.sendMessage({
-  //     type: "SELECTED_TEXT",
-  //     selectedTexts,
-  //   } as SelectedTextEvent);
-  // }
+  createConfirmButtons(selection);
 };
 
 const registerListeners = () => {
